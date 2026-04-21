@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle Demande - DXC</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f5f3; --surface: #fff; --border: #e8e8e6; --text: #1a1a1a;
+            --text-muted: #888; --accent: #2563eb; --accent-light: #eff6ff;
+            --success: #16a34a; --success-light: #f0fdf4;
+            --warning: #d97706; --warning-light: #fffbeb;
+            --danger: #dc2626; --danger-light: #fef2f2;
+            --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar { position: fixed; left: 0; top: 0; width: 240px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 0; z-index: 100; }
+        .sidebar-logo { padding: 0 24px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+        .sidebar-logo span { font-size: 22px; font-weight: 600; color: var(--accent); }
+        .sidebar-logo p { font-size: 11px; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 24px; color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s; }
+        .nav-item:hover, .nav-item.active { background: var(--accent-light); color: var(--accent); }
+        .nav-item .icon { font-size: 16px; width: 20px; }
+        .sidebar-footer { margin-top: auto; padding: 16px 24px; border-top: 1px solid var(--border); }
+        .user-pill { display: flex; align-items: center; gap: 10px; }
+        .avatar-sm { width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+        .user-pill-info { flex: 1; min-width: 0; }
+        .user-pill-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-pill-role { font-size: 11px; color: var(--text-muted); }
+        .logout-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; }
+        .logout-btn:hover { color: var(--danger); }
+
+        /* Main */
+        .main { margin-left: 240px; padding: 32px; max-width: calc(100% - 240px); }
+        .page-header { margin-bottom: 28px; }
+        .page-title { font-size: 22px; font-weight: 600; }
+        .page-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+        /* Type cards */
+        .type-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+        .type-card { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.15s; }
+        .type-card:hover { border-color: var(--accent); background: var(--accent-light); }
+        .type-card.active { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .type-card .card-icon { font-size: 28px; margin-bottom: 10px; }
+        .type-card .card-label { font-size: 13px; font-weight: 600; color: var(--text); }
+        .type-card .card-desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        /* Form card */
+        .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); margin-bottom: 20px; }
+        .form-card-title { font-size: 15px; font-weight: 600; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-grid.full { grid-template-columns: 1fr; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.span2 { grid-column: span 2; }
+        label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+        input, select, textarea { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--bg); color: var(--text); transition: border-color 0.15s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); background: white; }
+        textarea { min-height: 90px; resize: vertical; }
+
+        /* Date range */
+        .date-range { display: flex; align-items: center; gap: 10px; }
+        .date-range span { color: var(--text-muted); font-size: 13px; flex-shrink: 0; }
+
+        /* Actions */
+        .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px; }
+        .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; font-family: inherit; transition: opacity 0.15s; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-outline { background: none; border: 1px solid var(--border); color: var(--text); }
+
+        /* Alert */
+        .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: none; }
+        .alert-success { background: var(--success-light); color: var(--success); border: 1px solid #bbf7d0; }
+        .alert-error { background: var(--danger-light); color: var(--danger); border: 1px solid #fecaca; }
+
+        /* Toast */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; min-width: 280px; max-width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; }
+        .toast-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .toast-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .toast-close { margin-left: auto; background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.6; color: inherit; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <span>DXC</span>
+        <p>Portail DXC</p>
+    </div>
+    <a href="employee-dashboard.html" class="nav-item"><span class="icon">⊞</span> Tableau de bord</a>
+    <a href="request-form.html" class="nav-item active"><span class="icon">➕</span> Nouvelle demande</a>
+    <a href="requests-list.html" class="nav-item"><span class="icon">📋</span> Mes demandes</a>
+    <div class="sidebar-footer">
+        <div class="user-pill">
+            <div class="avatar-sm" id="sidebarAvatar">U</div>
+            <div class="user-pill-info">
+                <div class="user-pill-name" id="sidebarName">Utilisateur</div>
+                <div class="user-pill-role">Employé</div>
+            </div>
+            <button class="logout-btn" onclick="logout()">⏻</button>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <div class="page-title">Nouvelle demande</div>
+        <div class="page-subtitle">Sélectionnez un type de demande et remplissez le formulaire</div>
+    </div>
+
+    <!-- Type selection -->
+    <div class="type-grid">
+        <div class="type-card" onclick="selectType('ATTESTATION_TRAVAIL', this)">
+            <div class="card-icon">📄</div>
+            <div class="card-label">Attestation de travail</div>
+            <div class="card-desc">Document officiel d'emploi</div>
+        </div>
+        <div class="type-card" onclick="selectType('ATTESTATION_SALAIRE', this)">
+            <div class="card-icon">💼</div>
+            <div class="card-label">Attestation de salaire</div>
+            <div class="card-desc">Justificatif de revenus</div>
+        </div>
+        <div class="type-card" onclick="selectType('ATTESTATION_STAGE', this)">
+            <div class="card-icon">🎓</div>
+            <div class="card-label">Attestation de stage</div>
+            <div class="card-desc">Confirmation de stage</div>
+        </div>
+        <div class="type-card" onclick="selectType('CONGE_ANNUEL', this)">
+            <div class="card-icon">📅</div>
+            <div class="card-label">Congé annuel</div>
+            <div class="card-desc">Demande de congé payé</div>
+        </div>
+        <div class="type-card" onclick="selectType('CONGE_MALADIE', this)">
+            <div class="card-icon">🏥</div>
+            <div class="card-label">Congé maladie</div>
+            <div class="card-desc">Arrêt de travail médical</div>
+        </div>
+        <div class="type-card" onclick="selectType('CONGE_EXCEPTIONNEL', this)">
+            <div class="card-icon">⭐</div>
+            <div class="card-label">Congé exceptionnel</div>
+            <div class="card-desc">Événement familial</div>
+        </div>
+        <div class="type-card" onclick="selectType('ASSURANCE', this)">
+            <div class="card-icon">🛡️</div>
+            <div class="card-label">Assurance</div>
+            <div class="card-desc">Documents d'assurance</div>
+        </div>
+        <div class="type-card" onclick="selectType('ABONNEMENT_TRANSPORT', this)">
+            <div class="card-icon">🚌</div>
+            <div class="card-label">Abonnement Transport</div>
+            <div class="card-desc">Bus ou Taxi DXC</div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div id="formSection" class="hidden">
+        <div class="form-card">
+            <div class="form-card-title" id="formTitle">Détails de la demande</div>
+            <div id="alertBox" class="alert"></div>
+
+            <!-- Motif (always shown) -->
+            <div class="form-grid full" style="margin-bottom: 16px;">
+                <div class="form-group">
+                    <label>Motif de la demande *</label>
+                    <textarea id="motif" placeholder="Décrivez la raison de votre demande..."></textarea>
+                </div>
+            </div>
+
+            <!-- Date range (shown for congés) -->
+            <div id="dateSection" class="form-grid hidden" style="margin-bottom: 16px;">
+                <div class="form-group">
+                    <label>Date de début</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="form-group">
+                    <label>Date de fin</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+
+            <!-- Transport fields (shown for ABONNEMENT_TRANSPORT) -->
+            <div id="transportSection" class="form-grid hidden" style="margin-bottom: 16px;">
+                <div class="form-group">
+                    <label>Type de transport *</label>
+                    <select id="transportType">
+                        <option value="">-- Choisir --</option>
+                        <option value="BUS">🚌 Bus DXC</option>
+                        <option value="TAXI">🚕 Taxi DXC</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Adresse de départ (domicile) *</label>
+                    <input type="text" id="pickupAddress" placeholder="Ex: 12 Rue des Lilas, Ariana">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-outline" onclick="resetForm()">Annuler</button>
+                <button class="btn btn-primary" onclick="submitRequest()" id="submitBtn">Envoyer la demande</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API = 'http://localhost:8086/api';
+    const token = localStorage.getItem('authToken');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    let selectedType = null;
+
+    if (!token || !user.id) { window.location.href = '../html/login.html'; }
+
+    window.onload = function() {
+        if (user.firstName) {
+            document.getElementById('sidebarName').textContent = `${user.firstName} ${user.lastName || ''}`;
+            document.getElementById('sidebarAvatar').textContent = (user.firstName[0] + (user.lastName?.[0] || '')).toUpperCase();
+        }
+    };
+
+    function showToast(message, type = 'error', duration = 4000) {
+        const icons = { error: '❌', success: '✅' };
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `<span>${icons[type]} ${message}</span><button class="toast-close" onclick="this.parentElement.remove()">×</button>`;
+        document.getElementById('toast-container').appendChild(toast);
+        setTimeout(() => toast.remove(), duration);
+    }
+
+    const typeLabels = {
+        ATTESTATION_TRAVAIL: 'Attestation de travail',
+        ATTESTATION_SALAIRE: 'Attestation de salaire',
+        ATTESTATION_STAGE: 'Attestation de stage',
+        CONGE_ANNUEL: 'Congé annuel',
+        CONGE_MALADIE: 'Congé maladie',
+        CONGE_EXCEPTIONNEL: 'Congé exceptionnel',
+        ASSURANCE: 'Assurance',
+        ABONNEMENT_TRANSPORT: 'Abonnement Transport DXC'
+    };
+
+    const congeTypes = ['CONGE_ANNUEL', 'CONGE_MALADIE', 'CONGE_EXCEPTIONNEL'];
+
+    function selectType(type, el) {
+        document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        selectedType = type;
+
+        document.getElementById('formTitle').textContent = typeLabels[type];
+        document.getElementById('formSection').classList.remove('hidden');
+        document.getElementById('alertBox').style.display = 'none';
+        document.getElementById('motif').value = '';
+
+        const dateSection = document.getElementById('dateSection');
+        const transportSection = document.getElementById('transportSection');
+
+        if (congeTypes.includes(type)) {
+            dateSection.classList.remove('hidden');
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+        } else {
+            dateSection.classList.add('hidden');
+        }
+
+        if (type === 'ABONNEMENT_TRANSPORT') {
+            transportSection.classList.remove('hidden');
+            document.getElementById('transportType').value = '';
+            document.getElementById('pickupAddress').value = '';
+        } else {
+            transportSection.classList.add('hidden');
+        }
+
+        document.getElementById('formSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function submitRequest() {
+        const motif = document.getElementById('motif').value.trim();
+        const alertBox = document.getElementById('alertBox');
+
+        if (!selectedType) {
+            showToast('Veuillez sélectionner un type de demande.', 'error');
+            return;
+        }
+        if (!motif) {
+            alertBox.className = 'alert alert-error';
+            alertBox.textContent = 'Le motif est obligatoire.';
+            alertBox.style.display = 'block';
+            return;
+        }
+
+        // Validation transport
+        if (selectedType === 'ABONNEMENT_TRANSPORT') {
+            const transportType = document.getElementById('transportType').value;
+            const pickupAddress = document.getElementById('pickupAddress').value.trim();
+            if (!transportType) {
+                alertBox.className = 'alert alert-error';
+                alertBox.textContent = 'Veuillez sélectionner un type de transport.';
+                alertBox.style.display = 'block';
+                return;
+            }
+            if (!pickupAddress) {
+                alertBox.className = 'alert alert-error';
+                alertBox.textContent = 'L\'adresse de départ est obligatoire.';
+                alertBox.style.display = 'block';
+                return;
+            }
+        }
+
+        const body = {
+            employee: { id: user.id },
+            type: selectedType,
+            motif,
+            startDate: document.getElementById('startDate')?.value || null,
+            endDate: document.getElementById('endDate')?.value || null,
+            transportType: selectedType === 'ABONNEMENT_TRANSPORT' ? document.getElementById('transportType').value : null,
+            pickupAddress: selectedType === 'ABONNEMENT_TRANSPORT' ? document.getElementById('pickupAddress').value.trim() : null
+        };
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Envoi en cours...';
+
+        try {
+            const res = await fetch(`${API}/requests/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.success) {
+                alertBox.className = 'alert alert-success';
+                alertBox.textContent = '✅ Demande envoyée avec succès ! Redirection...';
+                alertBox.style.display = 'block';
+                setTimeout(() => { window.location.href = '../html/requests-list.html'; }, 1500);
+            } else {
+                alertBox.className = 'alert alert-error';
+                alertBox.textContent = data.message || 'Erreur lors de l\'envoi.';
+                alertBox.style.display = 'block';
+            }
+        } catch (e) {
+            showToast('Service indisponible. Vérifiez que le serveur SLA est démarré (port 8086).', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Envoyer la demande';
+        }
+    }
+
+    function resetForm() {
+        if (confirm('Annuler la demande ?')) {
+            window.location.href = '../html/employee-dashboard.html';
+        }
+    }
+
+    function logout() {
+        if (confirm('Se déconnecter ?')) { localStorage.clear(); window.location.href = '../html/login.html'; }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DXC Portal — Configuration SLA</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --dxc-a: #F5956A;
+      --dxc-b: #C9A4CC;
+      --dxc-c: #9B8FDB;
+      --dxc-grad: linear-gradient(135deg, #F5956A 0%, #C9A4CC 50%, #9B8FDB 100%);
+      --dxc-grad-soft: linear-gradient(135deg, rgba(245,149,106,.13) 0%, rgba(155,143,219,.13) 100%);
+      --accent: #F5956A;
+      --accent-light: #fdeee6;
+      --sidebar-w: 240px;
+      --header-h: 60px;
+      --radius: 10px;
+      --shadow: 0 1px 4px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.05);
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f9f5f0; color: #1e293b; }
+
+    /* LAYOUT */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w); background: #0f172a; color: #fff;
+      display: flex; flex-direction: column; position: fixed; top: 0; left: 0;
+      height: 100vh; z-index: 100;
+    }
+    .sidebar::before { content: ''; display: block; height: 3px; background: var(--dxc-grad); flex-shrink: 0; }
+    .sidebar-logo { padding: 18px 20px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .role-badge { font-size: 10px; background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); border-radius: 4px; padding: 2px 6px; letter-spacing: .3px; width: fit-content; margin-top: 6px; }
+    .sidebar-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer;
+      color: rgba(255,255,255,.55); font-size: 13.5px; font-weight: 500;
+      transition: all .15s; border-left: 3px solid transparent; text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.06); }
+    .nav-item.active { background: linear-gradient(90deg, rgba(245,149,106,.12), transparent); color: #fff; border-left-color: var(--dxc-a); }
+    .nav-item svg { flex-shrink: 0; opacity: .55; }
+    .nav-item:hover svg, .nav-item.active svg { opacity: 1; }
+    .sidebar-footer { padding: 14px 20px; border-top: 1px solid rgba(255,255,255,.08); }
+    .sidebar-footer .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--dxc-grad); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; color: #fff; }
+    .user-name-sidebar { font-size: 13px; font-weight: 600; color: #fff; }
+    .user-role-label { font-size: 11px; color: rgba(255,255,255,.45); }
+    .btn-logout { width: 100%; padding: 8px; background: transparent; border: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.6); border-radius: 6px; cursor: pointer; font-size: 13px; transition: all .15s; }
+    .btn-logout:hover { background: rgba(255,255,255,.07); color: #fff; }
+
+    /* MAIN */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+    .topbar {
+      height: var(--header-h); background: #fff; border-bottom: 1px solid #e2e8f0;
+      border-top: 3px solid transparent;
+      background-image: linear-gradient(#fff,#fff), var(--dxc-grad);
+      background-origin: border-box; background-clip: padding-box, border-box;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    }
+    .topbar-title { font-size: 17px; font-weight: 600; color: #0f172a; letter-spacing: -.2px; }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; }
+    .content { padding: 24px; }
+
+    /* CARD */
+    .card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid #e8ecf2; margin-bottom: 20px; overflow: hidden; animation: fadeUp .45s ease both; }
+    .card:hover { box-shadow: 0 8px 28px rgba(0,0,0,.1); transform: translateY(-1px); }
+    .card-header { padding: 15px 20px; border-bottom: 1px solid #eef2f7; background: #fafbfc; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .card-title { font-size: 14px; font-weight: 600; color: #0f172a; letter-spacing: -.1px; }
+    .card-body { padding: 20px; }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .2s; text-decoration: none; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-primary { background: var(--dxc-grad); color: #fff; }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-danger:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* FORMS */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-label { font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 5px; }
+    .form-label .req { color: #dc2626; margin-left: 2px; }
+    .form-control {
+      width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 7px;
+      font-size: 13.5px; color: #1e293b; background: #fff; transition: border-color .2s; font-family: inherit;
+    }
+    .form-control:focus { outline: none; border-color: var(--dxc-c); box-shadow: 0 0 0 3px rgba(155,143,219,.18); }
+    .form-control.is-error { border-color: #dc2626 !important; }
+    .field-error { display: none; color: #dc2626; font-size: 12px; margin-top: 4px; }
+    .field-error.visible { display: block; }
+    input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 20 20' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+
+    /* TOOLBAR */
+    .form-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .toolbar-select { flex: 1; min-width: 180px; max-width: 320px; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 7px; font-size: 13.5px; background: #fff; color: #1e293b; font-family: inherit; }
+    .toolbar-select:focus { outline: none; border-color: var(--dxc-c); box-shadow: 0 0 0 3px rgba(155,143,219,.18); }
+
+    /* SECTION TITLE */
+    .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: #64748b; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+
+    /* UNIT TOGGLE */
+    .target-wrap { display: flex; align-items: center; gap: 6px; }
+    .target-wrap .form-control { flex: 1; }
+    .unit-btns { display: flex; gap: 3px; flex-shrink: 0; }
+    .unit-btn { padding: 7px 10px; font-size: 12px; font-weight: 700; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; color: #6b7280; cursor: pointer; transition: all .15s; }
+    .unit-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+    .unit-btn.active { background: var(--dxc-grad); border-color: transparent; color: #fff; }
+
+    /* NOTIFICATION */
+    .notif { display: none; border-radius: 8px; font-size: 13.5px; margin-top: 16px; padding: 12px 16px; }
+    .notif.visible { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+    .notif-success { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+    .notif-error   { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+    .notif-warning { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; flex-direction: column !important; }
+    .notif-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+    /* FORM TITLE */
+    .form-title { font-size: 15px; font-weight: 600; color: #0f172a; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eef2f7; }
+
+    /* FORM ACTIONS */
+    .form-actions { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .role-badge, .user-name-sidebar, .user-role-label, .nav-item span { display: none; }
+      .main { margin-left: 60px; }
+      .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg width="72" height="25" viewBox="0 0 88 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="dxcG" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="#F5956A"/>
+            <stop offset="45%"  stop-color="#C9A4CC"/>
+            <stop offset="100%" stop-color="#9B8FDB"/>
+          </linearGradient>
+        </defs>
+        <path d="M1 2 L1 28 L13 28 C21 28 26 22.5 26 15 C26 7.5 21 2 13 2 Z M7 8 L12 8 C17 8 20 11 20 15 C20 19 17 22 12 22 L7 22 Z" fill="url(#dxcG)"/>
+        <path d="M30 2 L38.5 15 L30 28 L37 28 L43 19.5 L49 28 L56 28 L47.5 15 L56 2 L49 2 L43 10.5 L37 2 Z" fill="url(#dxcG)"/>
+        <path d="M87 10 C84 6 79 2 73 2 C64 2 58 8 58 15 C58 22 64 28 73 28 C79 28 84 25 87 21 L81 18 C79 20.5 76 22 73 22 C67.5 22 64 18.5 64 15 C64 11.5 67.5 8 73 8 C76 8 79 9.5 81 12 Z" fill="url(#dxcG)"/>
+      </svg>
+      <div class="role-badge">SLA Config</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="rh.html" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="dashboard.html" class="nav-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Vue d'ensemble</span>
+      </a>
+      <a href="config-sla.html" class="nav-item active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg>
+        <span>Configuration SLA</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" id="sidebarAvatar">?</div>
+        <div>
+          <div class="user-name-sidebar" id="sidebarName">—</div>
+          <div class="user-role-label">SLA Manager</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">🚪 Déconnexion</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title">Configuration SLA</div>
+      <div class="topbar-actions">
+        <span style="font-size:13px;color:#64748b;" id="headerUser"></span>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚙️ Paramètres SLA par account</span>
+        </div>
+        <div class="card-body">
+
+          <!-- Toolbar -->
+          <div class="form-toolbar">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="handleNew()">
+              <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"/></svg>
+              Nouveau
+            </button>
+            <select class="toolbar-select" id="toolbarSelect" onchange="handleToolbarSelect(this.value)">
+              <option value="">Sélectionner un account...</option>
+            </select>
+            <button type="button" class="btn btn-danger btn-sm" id="deleteBtn" onclick="handleDelete()" disabled>
+              <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/></svg>
+              Supprimer
+            </button>
+          </div>
+
+          <div class="form-title" id="formTitle">Nouvelle configuration</div>
+
+          <form id="slaForm" onsubmit="handleSubmit(event)" novalidate>
+
+            <!-- Section: Account -->
+            <div style="margin-bottom:24px">
+              <div class="section-label">Account</div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Account <span class="req">*</span></label>
+                  <div id="accountFieldWrapper">
+                    <input type="text" id="fieldAccount" class="form-control" placeholder="Nom de l'account"
+                      oninput="setField('account',this.value)" onblur="touchField('account')">
+                  </div>
+                  <span class="field-error" id="error-account"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Desk <span class="req">*</span></label>
+                  <input type="text" id="fieldDeskAccount" class="form-control" placeholder="Desk account"
+                    oninput="setField('deskAccount',this.value)" onblur="touchField('deskAccount')">
+                  <span class="field-error" id="error-deskAccount"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section: SLA Contract -->
+            <div style="margin-bottom:24px">
+              <div class="section-label">Configuration du contrat SLA</div>
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label class="form-label">Timeframe BH (sec) <span class="req">*</span></label>
+                  <input type="text" id="fieldTimeFrame" class="form-control" placeholder="30"
+                    oninput="setField('timeFrame',this.value)" onblur="touchField('timeFrame')">
+                  <span class="field-error" id="error-timeFrame"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Timeframe OOH (sec) <span class="req">*</span></label>
+                  <input type="text" id="fieldTimeFrameOoh" class="form-control" placeholder="30"
+                    oninput="setField('timeFrameOoh',this.value)" onblur="touchField('timeFrameOoh')">
+                  <span class="field-error" id="error-timeFrameOoh"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Timeframe autre SLA (sec)</label>
+                  <input type="text" id="fieldTimeFrameOther" class="form-control" placeholder="Optionnel"
+                    oninput="setField('timeFrameOther',this.value)" onblur="touchField('timeFrameOther')">
+                  <span class="field-error" id="error-timeFrameOther"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">SLA answered <span class="req">*</span></label>
+                  <input type="text" id="fieldAnswerSla" class="form-control" list="answerSlaList" placeholder="SLA1"
+                    oninput="setField('answerSla',this.value)" onblur="touchField('answerSla')">
+                  <datalist id="answerSlaList">
+                    <option value="SLA1"/><option value="SLA2"/><option value="SLA3"/>
+                    <option value="SLA1(30sec)"/><option value="SLA1(45sec)"/><option value="SLA1(90sec)"/>
+                  </datalist>
+                  <span class="field-error" id="error-answerSla"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Abd rate <span class="req">*</span></label>
+                  <input type="text" id="fieldAbandonSla" class="form-control" list="abandonSlaList" placeholder="Abd1"
+                    oninput="setField('abandonSla',this.value)" onblur="touchField('abandonSla')">
+                  <datalist id="abandonSlaList">
+                    <option value="Abd1"/><option value="Abd2"/><option value="Abd3"/>
+                    <option value="Abd4"/><option value="Abd5"/><option value="SLA1(45sec)"/>
+                  </datalist>
+                  <span class="field-error" id="error-abandonSla"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Autre SLA (optionnel)</label>
+                  <input type="text" id="fieldOtherSla" class="form-control" list="otherSlaList" placeholder="Optionnel"
+                    oninput="setField('otherSla',this.value)" onblur="touchField('otherSla')">
+                  <datalist id="otherSlaList"><option value="SLA1(90sec)"/></datalist>
+                  <span class="field-error" id="error-otherSla"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section: Metrics -->
+            <div style="margin-bottom:24px">
+              <div class="section-label">Métriques de réponse</div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Target Ans rate <span class="req">*</span></label>
+                  <div class="target-wrap">
+                    <input type="text" id="fieldTargetAnswerRate" class="form-control" placeholder="90%"
+                      oninput="setField('targetAnswerRate',this.value)" onblur="touchField('targetAnswerRate')">
+                    <div class="unit-btns">
+                      <button type="button" class="unit-btn" id="ansBtn-pct" onclick="applyUnit('targetAnswerRate','percent')">%</button>
+                      <button type="button" class="unit-btn" id="ansBtn-sec" onclick="applyUnit('targetAnswerRate','sec')">s</button>
+                    </div>
+                  </div>
+                  <span class="field-error" id="error-targetAnswerRate"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Target Abd rate <span class="req">*</span></label>
+                  <div class="target-wrap">
+                    <input type="text" id="fieldTargetAbandonRate" class="form-control" placeholder="5%"
+                      oninput="setField('targetAbandonRate',this.value)" onblur="touchField('targetAbandonRate')">
+                    <div class="unit-btns">
+                      <button type="button" class="unit-btn" id="abdBtn-pct" onclick="applyUnit('targetAbandonRate','percent')">%</button>
+                      <button type="button" class="unit-btn" id="abdBtn-sec" onclick="applyUnit('targetAbandonRate','sec')">s</button>
+                    </div>
+                  </div>
+                  <span class="field-error" id="error-targetAbandonRate"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Target autre SLA (optionnel)</label>
+                  <input type="text" id="fieldTargetOther" class="form-control" placeholder="Optionnel"
+                    oninput="setField('targetOther',this.value)" onblur="touchField('targetOther')">
+                  <span class="field-error" id="error-targetOther"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="submitBtn">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                <span id="submitLabel">Ajouter</span>
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="handleReset()">
+                <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"/></svg>
+                Réinitialiser
+              </button>
+            </div>
+
+            <!-- Notification -->
+            <div class="notif" id="notif">
+              <span id="notifMsg"></span>
+              <div class="notif-actions" id="notifActions" style="display:none">
+                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete()">Oui, supprimer</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="clearNotif()">Annuler</button>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../js/config-sla.js"></script>
+</body>
+</html>

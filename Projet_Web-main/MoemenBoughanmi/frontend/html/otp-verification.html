@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification — DXC Technology</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            background: #F2EDE8;
+        }
+
+        /* LEFT PANEL - same as login */
+        .left {
+            width: 420px;
+            min-height: 100vh;
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 40px;
+            flex-shrink: 0;
+        }
+
+        .left-logo { display: flex; align-items: baseline; gap: 5px; }
+        .logo-dxc { font-size: 22px; font-weight: 800; color: white; letter-spacing: 2px; }
+        .logo-tech { font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; }
+
+        .left-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px 0; }
+
+        .left-shield {
+            width: 56px;
+            height: 56px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .left-title { font-size: 28px; font-weight: 600; color: white; line-height: 1.3; letter-spacing: -0.3px; margin-bottom: 12px; }
+        .left-sub { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+        .left-steps { margin-top: 36px; display: flex; flex-direction: column; gap: 14px; }
+        .step { display: flex; align-items: flex-start; gap: 12px; }
+        .step-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+        .step-text { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+
+        .left-footer { font-size: 12px; color: rgba(255,255,255,0.25); }
+
+        /* RIGHT PANEL */
+        .right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 32px;
+        }
+
+        .form-box { width: 100%; max-width: 420px; }
+
+        .form-header { margin-bottom: 32px; }
+        .form-header h1 { font-size: 26px; font-weight: 600; color: #0f172a; letter-spacing: -0.3px; margin-top: 20px; }
+        .form-header p { font-size: 14px; color: #64748b; margin-top: 6px; line-height: 1.5; }
+        .form-logo { display: flex; align-items: baseline; gap: 5px; margin-bottom: 4px; }
+        .form-logo .logo-dxc { color: #0f172a; }
+        .logo-tech-dark { font-size: 13px; font-weight: 400; color: #94a3b8; letter-spacing: 0.5px; }
+
+        .email-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #0f172a;
+            margin-top: 8px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .alert {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .alert.visible { display: flex; }
+        .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+        .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; }
+
+        .otp-label { font-size: 12px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .otp-input {
+            flex: 1;
+            height: 58px;
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            outline: none;
+            color: #0f172a;
+            background: white;
+            font-family: 'DM Mono', monospace;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            caret-color: transparent;
+        }
+
+        .otp-input:focus {
+            border-color: #0f172a;
+            box-shadow: 0 0 0 3px rgba(15,23,42,0.06);
+        }
+
+        .otp-input.filled { border-color: #0f172a; background: #f8fafc; }
+        .otp-input.error { border-color: #dc2626; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .submit-btn:hover { background: #1e293b; }
+        .submit-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        .timer-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .timer-count {
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            font-weight: 500;
+            color: #0f172a;
+        }
+
+        .timer-count.expiring { color: #dc2626; }
+
+        .resend-btn {
+            background: none;
+            border: none;
+            color: #0f172a;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            text-decoration: underline;
+            padding: 0;
+        }
+        .resend-btn:disabled { color: #94a3b8; cursor: not-allowed; text-decoration: none; }
+
+        .divider { border: none; border-top: 1px solid #e2e8f0; margin: 20px 0; }
+
+        .back-link {
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+        }
+        .back-link a { color: #0f172a; font-weight: 500; text-decoration: none; }
+        .back-link a:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) { .left { display: none; } }
+    
+        /* Aurora background */
+        .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55; }
+        .blob-1 { width: 700px; height: 600px; background: radial-gradient(circle, #F5A07A 0%, #F2875A 60%, transparent 100%); top: -150px; left: -180px; }
+        .blob-2 { width: 600px; height: 500px; background: radial-gradient(circle, #C8AEE8 0%, #9B8FDB 60%, transparent 100%); top: 20px; left: 200px; }
+        .blob-3 { width: 500px; height: 400px; background: radial-gradient(circle, #8BAEE0 0%, #7B9FE0 60%, transparent 100%); top: -80px; right: -100px; }
+
+    </style>
+</head>
+<body>
+<div class="aurora">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<div class="left">
+    <div class="left-logo"><a href="login.html" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-decoration:none;position:relative;z-index:2;padding:24px 32px;display:inline-flex;">
+      <svg width="72" height="24" viewBox="0 0 88 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="dxcAu" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#F5956A"/>
+            <stop offset="45%" stop-color="#C9A4CC"/>
+            <stop offset="100%" stop-color="#9B8FDB"/>
+          </linearGradient>
+        </defs>
+        <path d="M1 2 L1 28 L13 28 C21 28 26 22.5 26 15 C26 7.5 21 2 13 2 Z M7 8 L12 8 C17 8 20 11 20 15 C20 19 17 22 12 22 L7 22 Z" fill="url(#dxcAu)"/>
+        <path d="M30 2 L38.5 15 L30 28 L37 28 L43 19.5 L49 28 L56 28 L47.5 15 L56 2 L49 2 L43 10.5 L37 2 Z" fill="url(#dxcAu)"/>
+        <path d="M87 10 C84 6 79 2 73 2 C64 2 58 8 58 15 C58 22 64 28 73 28 C79 28 84 25 87 21 L81 18 C79 20.5 76 22 73 22 C67.5 22 64 18.5 64 15 C64 11.5 67.5 8 73 8 C76 8 79 9.5 81 12 Z" fill="url(#dxcAu)"/>
+      </svg>
+      <span style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#666;">Impossible. Delivered.</span>
+    </a></div>
+    <div class="left-body">
+        <div class="left-shield">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+        </div>
+        <h2 class="left-title">Vérification en deux étapes</h2>
+        <p class="left-sub">Un code à 6 chiffres a été envoyé à votre adresse email pour confirmer votre identité.</p>
+        <div class="left-steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-text">Vérifiez votre boîte de réception (et dossier spam)</div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-text">Entrez le code à 6 chiffres reçu par email</div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-text">Accédez à votre tableau de bord en toute sécurité</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="right">
+    <div class="form-box">
+        <div class="form-header">
+            <div class="form-logo" style="margin-bottom:16px;">
+          <svg width="64" height="22" viewBox="0 0 88 30" fill="none">
+            <defs>
+              <linearGradient id="dxcFm" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#F5956A"/>
+                <stop offset="45%" stop-color="#C9A4CC"/>
+                <stop offset="100%" stop-color="#9B8FDB"/>
+              </linearGradient>
+            </defs>
+            <path d="M1 2 L1 28 L13 28 C21 28 26 22.5 26 15 C26 7.5 21 2 13 2 Z M7 8 L12 8 C17 8 20 11 20 15 C20 19 17 22 12 22 L7 22 Z" fill="url(#dxcFm)"/>
+            <path d="M30 2 L38.5 15 L30 28 L37 28 L43 19.5 L49 28 L56 28 L47.5 15 L56 2 L49 2 L43 10.5 L37 2 Z" fill="url(#dxcFm)"/>
+            <path d="M87 10 C84 6 79 2 73 2 C64 2 58 8 58 15 C58 22 64 28 73 28 C79 28 84 25 87 21 L81 18 C79 20.5 76 22 73 22 C67.5 22 64 18.5 64 15 C64 11.5 67.5 8 73 8 C76 8 79 9.5 81 12 Z" fill="url(#dxcFm)"/>
+          </svg>
+        </div>
+            <h1>Code de vérification</h1>
+            <p>Un code a été envoyé à</p>
+            <div class="email-pill" id="emailPill">—</div>
+        </div>
+
+        <div class="alert alert-error" id="errorAlert">
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"/></svg>
+            <span id="errorText">Code invalide</span>
+        </div>
+
+        <div class="alert alert-success" id="successAlert">
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
+            <span id="successText">Connexion réussie !</span>
+        </div>
+
+        <div class="otp-label">Code à 6 chiffres</div>
+
+        <div class="otp-inputs">
+            <input type="text" maxlength="1" class="otp-input" id="otp1" inputmode="numeric" autofocus>
+            <input type="text" maxlength="1" class="otp-input" id="otp2" inputmode="numeric">
+            <input type="text" maxlength="1" class="otp-input" id="otp3" inputmode="numeric">
+            <input type="text" maxlength="1" class="otp-input" id="otp4" inputmode="numeric">
+            <input type="text" maxlength="1" class="otp-input" id="otp5" inputmode="numeric">
+            <input type="text" maxlength="1" class="otp-input" id="otp6" inputmode="numeric">
+        </div>
+
+        <button class="submit-btn" id="verifyBtn" onclick="verifyOtp()">
+            <span id="btnText">Vérifier le code</span>
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"/></svg>
+        </button>
+
+        <div class="timer-row">
+            <span>Code expire dans</span>
+            <span class="timer-count" id="countdown">5:00</span>
+        </div>
+
+        <div class="timer-row" style="margin-top:8px">
+            <span>Vous n'avez pas reçu le code ?</span>
+            <button class="resend-btn" id="resendBtn" onclick="resendOtp()" disabled>Renvoyer</button>
+        </div>
+
+        <hr class="divider">
+
+        <div class="back-link">
+            <a href="login.html">← Retour à la connexion</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const userEmail = sessionStorage.getItem('otpEmail');
+    if (!userEmail) window.location.href = 'login.html';
+
+    document.getElementById('emailPill').textContent = userEmail || '—';
+
+    // Timer
+    let timeLeft = 300;
+    let resendCooldown = 60;
+
+    const countdownEl = document.getElementById('countdown');
+    const resendBtn = document.getElementById('resendBtn');
+
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        countdownEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+        if (timeLeft <= 60) countdownEl.classList.add('expiring');
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            countdownEl.textContent = 'Expiré';
+            document.getElementById('verifyBtn').disabled = true;
+            showError('Le code a expiré. Veuillez vous reconnecter.');
+        }
+    }, 1000);
+
+    let resendInterval = setInterval(() => {
+        resendCooldown--;
+        if (resendCooldown <= 0) {
+            clearInterval(resendInterval);
+            resendBtn.disabled = false;
+            resendBtn.textContent = 'Renvoyer';
+        } else {
+            resendBtn.textContent = `Renvoyer (${resendCooldown}s)`;
+        }
+    }, 1000);
+
+    // OTP inputs logic
+    const otpInputs = document.querySelectorAll('.otp-input');
+
+    otpInputs.forEach((input, i) => {
+        input.addEventListener('input', (e) => {
+            const val = e.target.value.replace(/[^0-9]/g, '');
+            input.value = val;
+            if (val) {
+                input.classList.add('filled');
+                if (i < otpInputs.length - 1) otpInputs[i + 1].focus();
+                else verifyOtp();
+            } else {
+                input.classList.remove('filled');
+            }
+            hideAlerts();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !input.value && i > 0) {
+                otpInputs[i - 1].focus();
+                otpInputs[i - 1].value = '';
+                otpInputs[i - 1].classList.remove('filled');
+            }
+        });
+
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+            pasted.split('').forEach((ch, idx) => {
+                if (otpInputs[idx]) {
+                    otpInputs[idx].value = ch;
+                    otpInputs[idx].classList.add('filled');
+                }
+            });
+            if (pasted.length === 6) verifyOtp();
+        });
+    });
+
+    async function verifyOtp() {
+        const otp = Array.from(otpInputs).map(i => i.value).join('');
+        if (otp.length !== 6) { showError('Entrez les 6 chiffres du code'); return; }
+
+        const btn = document.getElementById('verifyBtn');
+        const btnText = document.getElementById('btnText');
+        btn.disabled = true;
+        btnText.textContent = 'Vérification...';
+        hideAlerts();
+
+        try {
+            const res = await fetch('http://localhost:8083/api/auth/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail, otp })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem('isLoggedIn', 'true');
+                sessionStorage.removeItem('otpEmail');
+                showSuccess('Connexion réussie ! Redirection...');
+                setTimeout(() => {
+                    const role = data.user.role;
+                    if (role === 'ADMIN') window.location.href = 'admin-dashboard.html';
+                    else if (role === 'RH') window.location.href = 'hr-dashboard.html';
+                    else if (role === 'MANAGER') window.location.href = 'manager-dashboard.html';
+                    else window.location.href = 'employee-dashboard.html';
+                }, 1200);
+            } else {
+                showError(data.message || 'Code incorrect. Réessayez.');
+                otpInputs.forEach(i => { i.value = ''; i.classList.remove('filled'); i.classList.add('error'); });
+                otpInputs[0].focus();
+                setTimeout(() => otpInputs.forEach(i => i.classList.remove('error')), 1500);
+            }
+        } catch (e) {
+            showError('Erreur de connexion au serveur.');
+        } finally {
+            btn.disabled = false;
+            btnText.textContent = 'Vérifier le code';
+        }
+    }
+
+    async function resendOtp() {
+        resendBtn.disabled = true;
+        resendCooldown = 60;
+        resendInterval = setInterval(() => {
+            resendCooldown--;
+            if (resendCooldown <= 0) { clearInterval(resendInterval); resendBtn.disabled = false; resendBtn.textContent = 'Renvoyer'; }
+            else resendBtn.textContent = `Renvoyer (${resendCooldown}s)`;
+        }, 1000);
+
+        try {
+            await fetch('http://localhost:8083/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail, password: '__resend__' })
+            });
+            showSuccess('Nouveau code envoyé à votre email.');
+        } catch (e) {
+            showError('Impossible de renvoyer le code.');
+        }
+    }
+
+    function showError(msg) {
+        document.getElementById('errorText').textContent = msg;
+        document.getElementById('errorAlert').classList.add('visible');
+        document.getElementById('successAlert').classList.remove('visible');
+    }
+
+    function showSuccess(msg) {
+        document.getElementById('successText').textContent = msg;
+        document.getElementById('successAlert').classList.add('visible');
+        document.getElementById('errorAlert').classList.remove('visible');
+    }
+
+    function hideAlerts() {
+        document.getElementById('errorAlert').classList.remove('visible');
+        document.getElementById('successAlert').classList.remove('visible');
+    }
+</script>
+</body>
+</html>

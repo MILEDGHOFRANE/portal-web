@@ -1,0 +1,27 @@
+# Maven build artifacts
+**/target/
+**/*.class
+**/*.jar
+
+# Logs
+**/*.log
+**/hs_err_pid*.log
+
+# Environment secrets — NEVER commit real credentials
+.env
+devops/.env
+**/.env
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+# H2 database files
+**/*.mv.db
+**/*.trace.db

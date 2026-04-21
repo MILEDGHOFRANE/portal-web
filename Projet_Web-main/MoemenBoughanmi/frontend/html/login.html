@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion — DXC Technology</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            background: #F2EDE8;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ── Aurora blobs ── */
+        .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; }
+        .blob-1 { width: 750px; height: 650px; background: radial-gradient(circle, #F5A07A 0%, #F2875A 55%, transparent 100%); top: -200px; left: -200px; animation: blobFloat1 12s ease-in-out infinite; }
+        .blob-2 { width: 650px; height: 550px; background: radial-gradient(circle, #C8AEE8 0%, #9B8FDB 55%, transparent 100%); top: 0px; left: 250px; animation: blobFloat2 15s ease-in-out infinite; }
+        .blob-3 { width: 550px; height: 450px; background: radial-gradient(circle, #8BAEE0 0%, #7B9FE0 55%, transparent 100%); top: -100px; right: -120px; animation: blobFloat3 10s ease-in-out infinite; }
+
+        @keyframes blobFloat1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,20px) scale(1.05)} }
+        @keyframes blobFloat2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-20px,30px) scale(1.04)} }
+        @keyframes blobFloat3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-25px) scale(1.06)} }
+
+        /* ── Page wrapper ── */
+        .page {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+            gap: 0;
+        }
+
+        /* ── LOGO block — large centered ── */
+        .logo-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 36px;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center top;
+        }
+        .logo-block svg {
+            filter: drop-shadow(0 4px 24px rgba(245,149,106,0.25));
+            transition: filter 0.4s;
+        }
+        .logo-tagline {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3.5px;
+            text-transform: uppercase;
+            color: #777;
+            transition: opacity 0.3s;
+        }
+        .logo-sub {
+            font-size: 14px;
+            color: #999;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            margin-top: -4px;
+            transition: opacity 0.3s;
+        }
+
+        /* ── Login card ── */
+        .card {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.65);
+            border-radius: 22px;
+            padding: 40px 44px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 12px 50px rgba(0,0,0,0.09);
+            animation: cardSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        @keyframes cardSlideUp {
+            from { opacity: 0; transform: translateY(28px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card-header { margin-bottom: 26px; }
+        .card-header h1 { font-size: 22px; font-weight: 700; color: #111; letter-spacing: -0.4px; margin-bottom: 5px; }
+        .card-header p  { font-size: 13.5px; color: #999; }
+
+        /* ── Error ── */
+        .error-box {
+            display: none; align-items: center; gap: 10px;
+            background: #fff0f0; border: 1px solid #ffd0d0;
+            border-radius: 10px; padding: 11px 14px; margin-bottom: 16px;
+            font-size: 13px; color: #cc2222; font-weight: 500;
+        }
+        .error-box.visible { display: flex; }
+
+        /* ── Fields ── */
+        .field { margin-bottom: 15px; }
+        .field label {
+            display: block; font-size: 11px; font-weight: 700;
+            color: #555; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 7px;
+        }
+        .input-wrap { position: relative; }
+        .input-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #bbb; pointer-events: none; }
+        input[type="email"], input[type="password"], input[type="text"] {
+            width: 100%; padding: 11px 12px 11px 40px;
+            border: 1.5px solid #E5DDD8; border-radius: 11px;
+            font-size: 14px; font-family: inherit; color: #111;
+            background: rgba(255,255,255,0.9);
+            transition: border-color 0.15s, box-shadow 0.15s; outline: none;
+        }
+        input:focus { border-color: #9B8FDB; box-shadow: 0 0 0 3px rgba(155,143,219,0.15); }
+        input.error { border-color: #cc2222; }
+        .toggle-pw {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; color: #bbb; padding: 2px; display: flex;
+        }
+        .toggle-pw:hover { color: #666; }
+
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .row a { font-size: 13px; color: #9B8FDB; text-decoration: none; font-weight: 500; }
+        .row a:hover { text-decoration: underline; }
+        .remember { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #666; cursor: pointer; }
+        .remember input { width: auto; padding: 0; margin: 0; accent-color: #9B8FDB; }
+
+        /* ── Submit button ── */
+        .submit-btn {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #F5956A 0%, #C4A0C8 50%, #9B8FDB 100%);
+            background-size: 200% 200%;
+            color: white; border: none; border-radius: 11px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            font-family: inherit;
+            transition: opacity 0.2s, transform 0.15s, background-position 0.4s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .submit-btn:hover { opacity: 0.9; background-position: right center; transform: translateY(-1px); }
+        .submit-btn:active { transform: scale(0.99); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .card-footer {
+            text-align: center; margin-top: 22px; padding-top: 16px;
+            border-top: 1px solid rgba(0,0,0,0.06); font-size: 13px; color: #bbb;
+        }
+        .card-footer a {
+            background: linear-gradient(135deg, #F5956A, #9B8FDB);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; text-decoration: none; font-weight: 500;
+        }
+
+        /* ── LOGIN ANIMATION ── */
+        /* Step 1: logo flies up and shrinks */
+        .page.logging-in .logo-block {
+            transform: translateY(calc(-50vh + 40px)) scale(0.45);
+            opacity: 0.7;
+        }
+        .page.logging-in .logo-tagline,
+        .page.logging-in .logo-sub { opacity: 0; }
+
+        /* Step 2: card fades down */
+        .page.logging-in .card {
+            opacity: 0;
+            transform: translateY(20px) scale(0.97);
+            transition: all 0.5s ease;
+        }
+
+        /* Step 3: full page whiteout */
+        .page.logging-in::after {
+            content: '';
+            position: fixed; inset: 0; z-index: 999;
+            background: white;
+            animation: whiteout 0.4s ease 0.6s both;
+        }
+        @keyframes whiteout {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        /* ── Logo entrance animation ── */
+        .logo-block {
+            animation: logoEntrance 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        @keyframes logoEntrance {
+            from { opacity: 0; transform: translateY(-20px) scale(0.85); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @media (max-width: 500px) {
+            .card { padding: 30px 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="aurora">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<div class="page" id="page">
+
+    <!-- Large centered DXC logo -->
+    <div class="logo-block" id="logoBlock">
+        <svg width="180" height="62" viewBox="0 0 88 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%"   stop-color="#F5956A"/>
+                    <stop offset="45%"  stop-color="#C9A4CC"/>
+                    <stop offset="100%" stop-color="#9B8FDB"/>
+                </linearGradient>
+            </defs>
+            <path d="M1 2 L1 28 L13 28 C21 28 26 22.5 26 15 C26 7.5 21 2 13 2 Z M7 8 L12 8 C17 8 20 11 20 15 C20 19 17 22 12 22 L7 22 Z" fill="url(#lg)"/>
+            <path d="M30 2 L38.5 15 L30 28 L37 28 L43 19.5 L49 28 L56 28 L47.5 15 L56 2 L49 2 L43 10.5 L37 2 Z" fill="url(#lg)"/>
+            <path d="M87 10 C84 6 79 2 73 2 C64 2 58 8 58 15 C58 22 64 28 73 28 C79 28 84 25 87 21 L81 18 C79 20.5 76 22 73 22 C67.5 22 64 18.5 64 15 C64 11.5 67.5 8 73 8 C76 8 79 9.5 81 12 Z" fill="url(#lg)"/>
+        </svg>
+        <span class="logo-tagline">Impossible. Delivered.</span>
+        <span class="logo-sub">Portail Ressources Humaines</span>
+    </div>
+
+    <!-- Login card -->
+    <div class="card" id="loginCard">
+        <div class="card-header">
+            <h1>Connexion</h1>
+            <p>Entrez vos identifiants pour accéder au portail</p>
+        </div>
+
+        <div class="error-box" id="errorBox">
+            <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor" style="flex-shrink:0">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"/>
+            </svg>
+            <span id="errorMessage">Identifiants incorrects</span>
+        </div>
+
+        <form id="loginForm">
+            <div class="field">
+                <label>Adresse email</label>
+                <div class="input-wrap">
+                    <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                    </svg>
+                    <input type="email" id="email" placeholder="votre.email@dxc.com" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Mot de passe</label>
+                <div class="input-wrap">
+                    <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"/>
+                    </svg>
+                    <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                    <button type="button" class="toggle-pw" id="togglePw">
+                        <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <label class="remember">
+                    <input type="checkbox" id="remember"> Se souvenir de moi
+                </label>
+                <a href="forgot-password.html">Mot de passe oublié ?</a>
+            </div>
+
+            <button type="submit" class="submit-btn" id="loginBtn">
+                <span id="btnText">Se connecter</span>
+                <svg width="15" height="15" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"/>
+                </svg>
+            </button>
+        </form>
+
+        <div class="card-footer">
+            Besoin d'aide ? <a href="mailto:rh@dxc.com">rh@dxc.com</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const API = 'http://localhost:8083/api';
+
+    // Helper to normalize role from backend (handles 'admin', 'ADMIN', etc.)
+    function normalizeRole(role) {
+        if (!role) return null;
+        const r = role.toUpperCase();
+        const validRoles = ['ADMIN', 'RH', 'MANAGER', 'EMPLOYEE'];
+        return validRoles.includes(r) ? r : null;
+    }
+
+    // Redirect already-authenticated users to their dashboard
+    (function checkExistingAuth() {
+        const authToken = localStorage.getItem('authToken');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const userStr = localStorage.getItem('user');
+
+        if (authToken && isLoggedIn === 'true' && userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                const rawRole = user?.role;
+                const role = normalizeRole(rawRole);
+                if (role) {
+                    const redirectMap = {
+                        ADMIN: '/admin.html',
+                        RH: '/rh.html',
+                        MANAGER: '/manager.html',
+                        EMPLOYEE: '/employee.html'
+                    };
+                    const target = redirectMap[role] || '/dashboard.html';
+                    window.location.href = target;
+                    return;
+                }
+            } catch (e) {
+                // Invalid user data, clear it and stay on login page
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                localStorage.removeItem('isLoggedIn');
+            }
+        }
+    })();
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email    = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const errorBox = document.getElementById('errorBox');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText  = document.getElementById('btnText');
+
+        errorBox.classList.remove('visible');
+        loginBtn.disabled = true;
+        btnText.textContent = 'Connexion…';
+
+        try {
+            const res  = await fetch(`${API}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                // ── PLAY EXIT ANIMATION ──
+                document.getElementById('page').classList.add('logging-in');
+
+                // Ensure data is saved exactly as expected by other pages
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                localStorage.setItem('isLoggedIn', 'true');
+
+                if (data.requiresOtp) {
+                    sessionStorage.setItem('otpEmail', email);
+                    console.log('OTP required, redirecting to verification page');
+                    setTimeout(() => { window.location.href = '/otp-verification.html'; }, 1000);
+                } else {
+                    const rawRole = data.user.role;
+                    const role = normalizeRole(rawRole);
+                    console.log('Login success, raw role:', rawRole, 'normalized:', role);
+
+                    if (!role) {
+                        console.error('Invalid role received:', rawRole);
+                        document.getElementById('errorMessage').textContent = 'Erreur: rôle utilisateur invalide';
+                        errorBox.classList.add('visible');
+                        loginBtn.disabled = false;
+                        btnText.textContent = 'Se connecter';
+                        return;
+                    }
+
+                    // Store normalized role back to user object
+                    const userWithNormalizedRole = { ...data.user, role: role };
+                    localStorage.setItem('user', JSON.stringify(userWithNormalizedRole));
+
+                    const redirectMap = {
+                        ADMIN: '/admin.html',
+                        RH: '/rh.html',
+                        MANAGER: '/manager.html',
+                        EMPLOYEE: '/employee.html'
+                    };
+
+                    const target = redirectMap[role] || '/dashboard.html';
+                    console.log('Redirecting to:', target);
+
+                    setTimeout(() => {
+                        window.location.href = target;
+                    }, 1050);
+                }
+            } else {
+                // ── SHAKE animation on error ──
+                const card = document.getElementById('loginCard');
+                card.style.animation = 'none';
+                card.style.transform = 'translateX(0)';
+                setTimeout(() => {
+                    card.style.animation = 'shake 0.4s ease';
+                }, 10);
+
+                document.getElementById('errorMessage').textContent = data.message || 'Email ou mot de passe incorrect';
+                errorBox.classList.add('visible');
+                document.getElementById('password').value = '';
+                document.getElementById('password').classList.add('error');
+                document.getElementById('password').focus();
+                loginBtn.disabled = false;
+                btnText.textContent = 'Se connecter';
+            }
+        } catch (err) {
+            document.getElementById('errorMessage').textContent = 'Impossible de joindre le serveur.';
+            errorBox.classList.add('visible');
+            loginBtn.disabled = false;
+            btnText.textContent = 'Se connecter';
+        }
+    });
+
+    document.getElementById('password').addEventListener('input', () => {
+        document.getElementById('password').classList.remove('error');
+        document.getElementById('errorBox').classList.remove('visible');
+    });
+
+    document.getElementById('togglePw').addEventListener('click', () => {
+        const pw = document.getElementById('password');
+        pw.type = pw.type === 'password' ? 'text' : 'password';
+    });
+</script>
+
+<style>
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%       { transform: translateX(-8px); }
+        40%       { transform: translateX(8px); }
+        60%       { transform: translateX(-5px); }
+        80%       { transform: translateX(5px); }
+    }
+</style>
+</body>
+</html>

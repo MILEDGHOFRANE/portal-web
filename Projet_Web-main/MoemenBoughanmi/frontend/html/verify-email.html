@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification Email - DXC Technology</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #F2EDE8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55; }
+        .blob-1 { width: 700px; height: 600px; background: radial-gradient(circle, #F5A07A 0%, #F2875A 60%, transparent 100%); top: -150px; left: -180px; }
+        .blob-2 { width: 600px; height: 500px; background: radial-gradient(circle, #C8AEE8 0%, #9B8FDB 60%, transparent 100%); top: 20px; left: 200px; }
+        .blob-3 { width: 500px; height: 400px; background: radial-gradient(circle, #8BAEE0 0%, #7B9FE0 60%, transparent 100%); top: -80px; right: -100px; }
+        .dxc-topbar { position: relative; z-index: 2; width: 100%; max-width: 500px; margin-bottom: 16px; }
+        .container { position: relative; z-index: 1; }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 50px;
+            text-align: center;
+        }
+
+        .icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #F5956A 0%, #C4A0C8 50%, #9B8FDB 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .loading-icon {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 32px;
+        }
+
+        .message {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #F5956A 0%, #C4A0C8 50%, #9B8FDB 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .link {
+            color: #667eea;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        #loadingState,
+        #successState,
+        #errorState {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="aurora">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+<div class="dxc-topbar">
+    <a href="login.html" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-decoration:none;">
+      <svg width="72" height="24" viewBox="0 0 88 30" fill="none">
+        <defs><linearGradient id="dxcVe" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#F5956A"/><stop offset="45%" stop-color="#C9A4CC"/><stop offset="100%" stop-color="#9B8FDB"/></linearGradient></defs>
+        <path d="M1 2 L1 28 L13 28 C21 28 26 22.5 26 15 C26 7.5 21 2 13 2 Z M7 8 L12 8 C17 8 20 11 20 15 C20 19 17 22 12 22 L7 22 Z" fill="url(#dxcVe)"/>
+        <path d="M30 2 L38.5 15 L30 28 L37 28 L43 19.5 L49 28 L56 28 L47.5 15 L56 2 L49 2 L43 10.5 L37 2 Z" fill="url(#dxcVe)"/>
+        <path d="M87 10 C84 6 79 2 73 2 C64 2 58 8 58 15 C58 22 64 28 73 28 C79 28 84 25 87 21 L81 18 C79 20.5 76 22 73 22 C67.5 22 64 18.5 64 15 C64 11.5 67.5 8 73 8 C76 8 79 9.5 81 12 Z" fill="url(#dxcVe)"/>
+      </svg>
+      <span style="font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#666;">Impossible. Delivered.</span>
+    </a>
+</div>
+    <div class="container">
+
+        <div id="loadingState">
+            <div class="loading-icon"></div>
+            <h1>Vérification en cours...</h1>
+            <p class="message">Veuillez patienter pendant que nous vérifions votre compte.</p>
+        </div>
+        <div id="successState">
+            <div class="icon">✅</div>
+            <h1>Compte vérifié !</h1>
+            <div class="success-message">
+                <strong>Félicitations !</strong><br>
+                Votre compte a été activé avec succès.
+            </div>
+            <p class="message">
+                Vous pouvez maintenant vous connecter et profiter de tous les services DXC Technology.
+            </p>
+            <a href="login.html" class="btn">Se connecter</a>
+        </div>
+        <div id="errorState">
+            <div class="icon">❌</div>
+            <h1>Erreur de vérification</h1>
+            <div class="error-message" id="errorMessageText">
+            </div>
+            <p class="message">
+                Le lien de vérification est peut-être expiré ou invalide.
+            </p>
+            <a href="login.html" class="btn">Retour à la connexion</a>
+            <br>
+            <a href="#" class="link" onclick="resendVerification(event)">Renvoyer l'email de vérification</a>
+        </div>
+    </div>
+
+    <script>
+    
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        
+        async function verifyEmail() {
+            if (!token) {
+                showError('Token de vérification manquant');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch(`http://localhost:8083/api/auth/verify?token=${token}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess();
+                } else {
+                    showError(data.message || 'Erreur lors de la vérification');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur de connexion au serveur');
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('successState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
+        }
+
+        function showSuccess() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('successState').style.display = 'block';
+            document.getElementById('errorState').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('successState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorMessageText').textContent = message;
+        }
+
+        async function resendVerification(event) {
+            event.preventDefault();
+            alert('Fonctionnalité à venir : Renvoyer l\'email de vérification');
+        
+        }
+
+        window.onload = verifyEmail;
+    </script>
+</body>
+</html>
