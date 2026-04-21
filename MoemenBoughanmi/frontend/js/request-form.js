@@ -2,7 +2,7 @@
 // REQUEST FORM - JAVASCRIPT
 // ============================================
 
-const API_BASE_URL = 'http://localhost:8081/api';
+const API_BASE_URL = 'http://localhost:8086/api';
 let selectedServiceType = null;
 let uploadedFiles = [];
 
