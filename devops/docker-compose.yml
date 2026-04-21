@@ -1,16 +1,5 @@
 version: '3.8'
 
-# =============================================================
-#  DXC Portal — Docker Compose Production
-#  Structure repo attendue :
-#    MoemenBoughanmi/
-#      database/init.sql
-#      backend/auth-microservice/
-#      backend/profiles-microservice/
-#      backend/sla-microservice/
-#      frontend/
-# =============================================================
-
 services:
 
   # ===========================================================
@@ -22,15 +11,11 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: Root@123
-      # dxc_form est la base principale (auth + sla + profiles)
       MYSQL_DATABASE: dxc_form
     ports:
       - "3306:3306"
     volumes:
-      # Persistance des données entre redémarrages
       - mysql-data:/var/lib/mysql
-      # init.sql est exécuté automatiquement au PREMIER démarrage
-      # (uniquement si le volume mysql-data est vide)
       - ../MoemenBoughanmi/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - dxc-network
@@ -42,7 +27,7 @@ services:
       start_period: 30s
 
   # ===========================================================
-  #  AUTH MICROSERVICE  (port interne 8083)
+  #  AUTH MICROSERVICE  (port 8083)
   # ===========================================================
   auth-microservice:
     build:
@@ -54,14 +39,15 @@ services:
     ports:
       - "8083:8083"
     environment:
-      # Remplace localhost par le nom du service Docker
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/dxc_form?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: Root@123
-      # URL frontend utilisée dans les emails de vérification
-      APP_FRONTEND_URL: http://localhost
-      # JWT secret (même valeur que dans application.properties)
+      APP_FRONTEND_URL: http://localhost:3000
       APP_JWT_SECRET: ZHhjLXNlY3JldC1rZXktY2hhbmdlLXRoaXMtaW4tcHJvZHVjdGlvbi13aXRoLWEtdmVyeS1sb25nLXJhbmRvbS1zdHJpbmc=
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: moememboughanmi@gmail.com
+      SPRING_MAIL_PASSWORD: rlhhepvctqoqqqhz
     depends_on:
       mysql:
         condition: service_healthy
@@ -69,7 +55,7 @@ services:
       - dxc-network
 
   # ===========================================================
-  #  PROFILES MICROSERVICE  (port interne 8085)
+  #  PROFILES MICROSERVICE  (port 8085)
   # ===========================================================
   profiles-microservice:
     build:
@@ -81,8 +67,8 @@ services:
     ports:
       - "8085:8085"
     environment:
-      # application.properties pointe sur dxc_form → on respecte ça
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/dxc_form?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      # profiles_db : base dédiée créée par init.sql
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/profiles_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: Root@123
       APP_JWT_SECRET: ZHhjLXNlY3JldC1rZXktY2hhbmdlLXRoaXMtaW4tcHJvZHVjdGlvbi13aXRoLWEtdmVyeS1sb25nLXJhbmRvbS1zdHJpbmc=
@@ -95,7 +81,7 @@ services:
       - dxc-network
 
   # ===========================================================
-  #  SLA MICROSERVICE  (port interne 8086)
+  #  SLA MICROSERVICE  (port 8086)
   # ===========================================================
   sla-microservice:
     build:
@@ -105,7 +91,6 @@ services:
     container_name: dxc-sla
     restart: always
     ports:
-      # CORRECTION : était 8086:8080, l'app écoute sur 8086
       - "8086:8086"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/dxc_form?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
@@ -113,6 +98,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: Root@123
       APP_JWT_SECRET: ZHhjLXNlY3JldC1rZXktY2hhbmdlLXRoaXMtaW4tcHJvZHVjdGlvbi13aXRoLWEtdmVyeS1sb25nLXJhbmRvbS1zdHJpbmc=
       APP_HR_EMAIL: rh@dxc.com
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: moememboughanmi@gmail.com
+      SPRING_MAIL_PASSWORD: rlhhepvctqoqqqhz
     depends_on:
       mysql:
         condition: service_healthy
@@ -122,15 +111,7 @@ services:
       - dxc-network
 
   # ===========================================================
-  #  FRONTEND NGINX
-  #  Le frontend JS appelle localhost:8083, :8085, :8086
-  #  En prod Docker, "localhost" depuis le navigateur pointe
-  #  sur la machine hôte (pas le conteneur) → ça fonctionne
-  #  car les ports backend sont exposés sur l'hôte ci-dessus.
-  #
-  #  Le proxy_pass nginx est configuré en plus pour les
-  #  environnements où l'hôte n'est pas accessible directement
-  #  (CI, cloud, etc.) via les locations /api/auth, /api/sla...
+  #  FRONTEND NGINX  (port 3000)
   # ===========================================================
   frontend:
     build:
@@ -140,10 +121,7 @@ services:
     container_name: dxc-frontend
     restart: always
     ports:
-      - "80:80"
-    volumes:
-      # Mount html files for live reload during development
-      - ../MoemenBoughanmi/frontend/html:/usr/share/nginx/html/html:ro
+      - "3000:80"
     depends_on:
       - auth-microservice
       - profiles-microservice
@@ -151,17 +129,10 @@ services:
     networks:
       - dxc-network
 
-# =============================================================
-#  RÉSEAU
-# =============================================================
 networks:
   dxc-network:
     driver: bridge
 
-# =============================================================
-#  VOLUMES
-# =============================================================
 volumes:
-  # Données MySQL persistées entre docker-compose down/up
   mysql-data:
     driver: local
